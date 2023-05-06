@@ -1,0 +1,3 @@
+Sphinx==7.0.0
+linuxdoc==20230321
+docxbuilder==1.2.0
