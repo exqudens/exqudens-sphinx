@@ -1,3 +1,6 @@
+Flat table example.
+===================
+
 .. flat-table:: Characteristics of the BLE badge
    :header-rows: 1
 

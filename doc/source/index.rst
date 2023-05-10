@@ -7,15 +7,13 @@ Welcome to exqudens-sphinx's documentation!
 ===========================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Contents:
 
-
+   example/flat-table-example
+   example/numbered-list-example
 
 Indices and tables
 ==================
 
-* :ref:`genindex`
-* :ref:`modindex`
 * :ref:`search`
-* :doc:`flat-table-example <example/flat-table-example>`
