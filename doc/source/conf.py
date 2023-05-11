@@ -54,7 +54,7 @@ docx_pagebreak_before_section = 1
 # https://rst2pdf.org/static/manual.html#sphinx
 
 pdf_documents = [
-    ('index', project, release, author),
+    ('index', project, release, author)
 ]
 pdf_break_level = 2
 pdf_breakside = 'any'
