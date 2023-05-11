@@ -57,3 +57,4 @@ pdf_documents = [
     ('index', project, release, author),
 ]
 pdf_break_level = 2
+pdf_breakside = 'any'
