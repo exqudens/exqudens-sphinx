@@ -23,6 +23,7 @@ function(execute_script args)
     )
     set(multiValueKeywords
         "PROJECTS"
+        "BUILDERS"
     )
 
     cmake_parse_arguments("${currentFunctionName}" "${options}" "${oneValueKeywords}" "${multiValueKeywords}" "${args}")
@@ -72,6 +73,12 @@ function(execute_script args)
         set(projects "${${currentFunctionName}_PROJECTS}")
     endif()
 
+    if("${${currentFunctionName}_BUILDERS}" STREQUAL "")
+        set(builders "html" "docx" "pdf")
+    else()
+        set(builders "${${currentFunctionName}_BUILDERS}")
+    endif()
+
     find_program(SPHINX_BUILD_COMMAND
         NAMES "sphinx-build.exe" "sphinx-build"
         PATHS "${sourceDir}/${buildDirRelative}/py-env/Scripts" "${sourceDir}/${buildDirRelative}/py-env/bin"
@@ -119,7 +126,7 @@ function(execute_script args)
     endif()
 
     foreach(project IN LISTS "projects")
-        foreach(builder "html" "docx" "pdf")
+        foreach(builder IN LISTS "builders")
 
             # build
             if("${verbose}")
