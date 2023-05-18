@@ -1,0 +1,1 @@
+exqudens-sphinx: 1.0.0

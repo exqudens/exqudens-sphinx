@@ -3,12 +3,13 @@
 # For the full list of built-in configuration values, see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
+from pathlib import Path
 from datetime import datetime
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = 'exqudens-sphinx'
+project = Path(__file__).parent.parent.parent.joinpath('name-version.txt').open().read().split(':')[0].strip()
 copyright = '2023, exqudens'
 author = 'exqudens'
 release = '1.0.0'
@@ -38,7 +39,7 @@ html_static_path = []
 docx_documents = [
     (
         'index',
-        'docxbuilder.docx',
+        project + '.docx',
         {
             'title': project + ' documentation',
             'created': datetime.now().strftime('%Y-%m-%dT%H:%M:%S'),
