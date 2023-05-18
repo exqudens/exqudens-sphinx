@@ -65,6 +65,8 @@ function(execute_script args)
         set(projects
             "all"
             "flat-table"
+            "numbered-list"
+            "traceability"
         )
     else()
         set(projects "${${currentFunctionName}_PROJECTS}")
@@ -128,7 +130,7 @@ function(execute_script args)
             endif()
             execute_process(
                 COMMAND "${CMAKE_COMMAND}" "-E" "env" "PROJECT=${project}"
-                        "${SPHINX_BUILD_COMMAND}" "-E" "-b" "${builder}" "doc/source" "${buildDirRelative}/doc/${project}/${builder}"
+                        "${SPHINX_BUILD_COMMAND}" "-E" "-b" "${builder}" "doc" "${buildDirRelative}/doc/${project}/${builder}"
                 WORKING_DIRECTORY "${sourceDir}"
                 COMMAND_ECHO "STDOUT"
                 COMMAND_ERROR_IS_FATAL "ANY"
