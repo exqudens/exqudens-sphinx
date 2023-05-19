@@ -1,5 +1,9 @@
-.. toctree::
-   :maxdepth: 1
-   :caption: Numbered List Contents:
+Numbered list example.
+======================
 
-   example
+#. This is a numbered list.
+
+  #. Numbered list A.
+  #. Numbered list B.
+
+#. It has two items too.

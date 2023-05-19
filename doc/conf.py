@@ -6,15 +6,15 @@
 from pathlib import Path
 from datetime import datetime
 import mlx.traceability
-from multiproject.utils import get_project
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
+project = Path(__file__).parent.joinpath('name-version.txt').open().read().split(':')[0].strip()
 copyright = '2023, exqudens'
 author = 'exqudens'
-release = '1.0.0'
-rst_prolog = ''
+release = Path(__file__).parent.joinpath('name-version.txt').open().read().split(':')[1].strip()
+rst_prolog = '.. |project| replace:: ' + project
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -22,7 +22,6 @@ rst_prolog = ''
 extensions = [
     'linuxdoc.rstFlatTable',
     'mlx.traceability',
-    'multiproject',
     'docxbuilder',
     'rst2pdf.pdfbuilder'
 ]
@@ -34,25 +33,9 @@ exclude_patterns = []
 # https://melexis.github.io/sphinx-traceability-extension/configuration.html#configuration
 
 traceability_render_relationship_per_item = True
-
-# -- Options for MULTIPROJECT output -------------------------------------------------
-# https://sphinx-multiproject.readthedocs.io/en/latest/configuration.html#configuration
-
-multiproject_projects = {
-    'all': {'path': '.', 'use_config_file': False},
-    'flat-table': {'path': 'flat-table', 'use_config_file': False},
-    'numbered-list': {'path': 'numbered-list', 'use_config_file': False},
-    'traceability': {'path': 'traceability', 'use_config_file': False}
+traceability_notifications = {
+    'undefined-reference': 'UNDEFINED_REFERENCE'
 }
-
-current_project = get_project(multiproject_projects)
-
-if current_project == 'all':
-    project = Path(__file__).parent.parent.joinpath('name-version.txt').open().read().split(':')[0].strip()
-    rst_prolog += '.. |project| replace:: ' + project
-else:
-    project = current_project
-    rst_prolog += '.. |project| replace:: ' + project
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
@@ -73,10 +56,11 @@ docx_documents = [
             'subject': project + '-' + release,
             'keywords': ['sphinx']
         },
-        True
+        False
     )
 ]
-docx_pagebreak_before_section = 1
+docx_coverpage = False
+#docx_pagebreak_before_section = 1
 
 # -- Options for PDF output -------------------------------------------------
 # https://rst2pdf.org/static/manual.html#sphinx
@@ -84,5 +68,7 @@ docx_pagebreak_before_section = 1
 pdf_documents = [
     ('index', project, release, author)
 ]
-pdf_break_level = 2
-pdf_breakside = 'any'
+pdf_use_toc = True
+pdf_use_coverpage = False
+#pdf_break_level = 2
+#pdf_breakside = 'any'

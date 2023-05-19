@@ -16,7 +16,6 @@ py -m venv build/py-env
 ./build/py-env/Scripts/pip.exe install -U sphinx
 ./build/py-env/Scripts/pip.exe install -U linuxdoc
 ./build/py-env/Scripts/pip.exe install -U mlx.traceability
-./build/py-env/Scripts/pip.exe install -U sphinx-multiproject
 ./build/py-env/Scripts/pip.exe install -U docxbuilder
 ./build/py-env/Scripts/pip.exe install -U rst2pdf
 ./build/py-env/Scripts/pip.exe freeze > requirements.txt

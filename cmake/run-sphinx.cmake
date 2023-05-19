@@ -13,16 +13,18 @@ cmake_policy(SET CMP0057 NEW)
 
 function(execute_script args)
     set(currentFunctionName "${CMAKE_CURRENT_FUNCTION}")
-    cmake_path(GET "CMAKE_CURRENT_LIST_DIR" PARENT_PATH sourceDir)
+    cmake_path(GET "CMAKE_CURRENT_LIST_DIR" PARENT_PATH projectDir)
+    cmake_path(GET "CMAKE_CURRENT_LIST_FILE" STEM currentFileNameNoExt)
 
     set(options)
     set(oneValueKeywords
         "VERBOSE"
         "SSL"
+        "SOURCE_DIR"
         "BUILD_DIR"
     )
     set(multiValueKeywords
-        "PROJECTS"
+        "FILES"
         "BUILDERS"
     )
 
@@ -54,6 +56,14 @@ function(execute_script args)
         endif()
     endif()
 
+    if("${${currentFunctionName}_SOURCE_DIR}" STREQUAL "")
+        set(sourceDirRelative "doc")
+    else()
+        set(sourceDirRelative "${${currentFunctionName}_SOURCE_DIR}")
+        cmake_path(APPEND sourceDirRelative "DIR")
+        cmake_path(GET "sourceDirRelative" PARENT_PATH sourceDirRelative)
+    endif()
+
     if("${${currentFunctionName}_BUILD_DIR}" STREQUAL "")
         set(buildDirRelative "build")
     else()
@@ -62,16 +72,19 @@ function(execute_script args)
         cmake_path(GET "buildDirRelative" PARENT_PATH buildDirRelative)
     endif()
 
-    if("${${currentFunctionName}_PROJECTS}" STREQUAL "")
-        set(projects
-            "all"
-            "flat-table"
-            "numbered-list"
-            "traceability"
-        )
+    #[[if("${${currentFunctionName}_START_FILE}" STREQUAL "")
+        set(startFile "index")
     else()
-        set(projects "${${currentFunctionName}_PROJECTS}")
-    endif()
+        set(startFile "${${currentFunctionName}_START_FILE}")
+        cmake_path(APPEND startFile "DIR")
+        cmake_path(GET "startFile" PARENT_PATH startFile)
+        cmake_path(GET "startFile" PARENT_PATH startDir)
+        cmake_path(RELATIVE_PATH "startDir" BASE_DIRECTORY "${sourceDirRelative}" OUTPUT_VARIABLE startDir)
+        cmake_path(GET "startFile" STEM startFile)
+        if(NOT "${startDir}" STREQUAL "")
+            set(startFile "${startDir}/${startFile}")
+        endif()
+    endif()]]
 
     if("${${currentFunctionName}_BUILDERS}" STREQUAL "")
         set(builders "html" "docx" "pdf")
@@ -79,9 +92,31 @@ function(execute_script args)
         set(builders "${${currentFunctionName}_BUILDERS}")
     endif()
 
+    if("${${currentFunctionName}_FILES}" STREQUAL "")
+        set(files
+            "flat-table/index.rst"
+            "numbered-list/index.rst"
+            "traceability/user-requirements.rst"
+            "traceability/system-tests.rst"
+            "traceability/matrix.rst"
+        )
+    else()
+        set(files "")
+        foreach(file IN LISTS "${currentFunctionName}_FILES")
+            cmake_path(GET "file" PARENT_PATH fileDir)
+            cmake_path(RELATIVE_PATH "fileDir" BASE_DIRECTORY "${sourceDirRelative}" OUTPUT_VARIABLE fileDir)
+            cmake_path(GET "file" FILENAME fileName)
+            if("${fileDir}" STREQUAL "")
+                list(APPEND files "${fileName}")
+            else()
+                list(APPEND files "${fileDir}/${fileName}")
+            endif()
+        endforeach()
+    endif()
+
     find_program(SPHINX_BUILD_COMMAND
         NAMES "sphinx-build.exe" "sphinx-build"
-        PATHS "${sourceDir}/${buildDirRelative}/py-env/Scripts" "${sourceDir}/${buildDirRelative}/py-env/bin"
+        PATHS "${projectDir}/${buildDirRelative}/py-env/Scripts" "${projectDir}/${buildDirRelative}/py-env/bin"
         NO_CACHE
         NO_DEFAULT_PATH
     )
@@ -94,13 +129,13 @@ function(execute_script args)
         find_program(PYTHON_COMMAND NAMES "py.exe" "py" "python.exe" "python" NO_CACHE REQUIRED)
         execute_process(
             COMMAND "${PYTHON_COMMAND}" "-m" "venv" "${buildDirRelative}/py-env"
-            WORKING_DIRECTORY "${sourceDir}"
+            WORKING_DIRECTORY "${projectDir}"
             COMMAND_ECHO "STDOUT"
             COMMAND_ERROR_IS_FATAL "ANY"
         )
         find_program(PIP_COMMAND
             NAMES "pip.exe" "pip"
-            PATHS "${sourceDir}/${buildDirRelative}/py-env/Scripts" "${sourceDir}/${buildDirRelative}/py-env/bin"
+            PATHS "${projectDir}/${buildDirRelative}/py-env/Scripts" "${projectDir}/${buildDirRelative}/py-env/bin"
             NO_CACHE
             REQUIRED
             NO_DEFAULT_PATH
@@ -112,38 +147,86 @@ function(execute_script args)
         list(APPEND command "-r" "requirements.txt")
         execute_process(
             COMMAND ${command}
-            WORKING_DIRECTORY "${sourceDir}"
+            WORKING_DIRECTORY "${projectDir}"
             COMMAND_ECHO "STDOUT"
             COMMAND_ERROR_IS_FATAL "ANY"
         )
         find_program(SPHINX_BUILD_COMMAND
             NAMES "sphinx-build.exe" "sphinx-build"
-            PATHS "${sourceDir}/${buildDirRelative}/py-env/Scripts" "${sourceDir}/${buildDirRelative}/py-env/bin"
+            PATHS "${projectDir}/${buildDirRelative}/py-env/Scripts" "${projectDir}/${buildDirRelative}/py-env/bin"
             NO_CACHE
             REQUIRED
             NO_DEFAULT_PATH
         )
     endif()
 
-    foreach(project IN LISTS "projects")
-        foreach(builder IN LISTS "builders")
+    # create structure
+    if("${verbose}")
+        message(STATUS "create structure")
+    endif()
+    if(EXISTS "${projectDir}/${buildDirRelative}/${currentFileNameNoExt}")
+        file(REMOVE_RECURSE "${projectDir}/${buildDirRelative}/${currentFileNameNoExt}")
+    endif()
+    string(JOIN "\n" indexRstContent
+        ".. toctree::"
+        "   :maxdepth: 2"
+        "   :caption: Contents:"
+    )
+    string(APPEND indexRstContent "\n" "" "\n")
+    foreach(file IN LISTS "files")
+        cmake_path(GET "file" PARENT_PATH fileDir)
+        cmake_path(GET "file" FILENAME fileName)
+        cmake_path(GET "fileName" STEM fileNameNoExt)
+        if("${fileDir}" STREQUAL "")
+            string(APPEND indexRstContent "   ${fileNameNoExt}" "\n")
+        else()
+            string(APPEND indexRstContent "   ${fileDir}/${fileNameNoExt}" "\n")
+        endif()
+    endforeach()
+    string(JOIN "\n" indexRstContent
+        "${indexRstContent}"
+        ""
+        "Undefined references."
+        "====================="
+        ""
+        ".. item:: UNDEFINED_REFERENCE Undefined reference."
+        ""
+    )
+    file(MAKE_DIRECTORY "${projectDir}/${buildDirRelative}/${currentFileNameNoExt}/${sourceDirRelative}")
+    file(WRITE "${projectDir}/${buildDirRelative}/${currentFileNameNoExt}/${sourceDirRelative}/index.rst" "${indexRstContent}")
+    foreach(file IN LISTS "files")
+        cmake_path(GET "file" PARENT_PATH fileDir)
+        if("${fileDir}" STREQUAL "")
+            file(COPY "${projectDir}/${sourceDirRelative}/${file}" DESTINATION "${projectDir}/${buildDirRelative}/${currentFileNameNoExt}/${sourceDirRelative}")
+        else()
+            file(MAKE_DIRECTORY "${projectDir}/${buildDirRelative}/${currentFileNameNoExt}/${sourceDirRelative}/${fileDir}")
+            file(COPY "${projectDir}/${sourceDirRelative}/${file}" DESTINATION "${projectDir}/${buildDirRelative}/${currentFileNameNoExt}/${sourceDirRelative}/${fileDir}")
+        endif()
+    endforeach()
+    file(COPY "${projectDir}/${sourceDirRelative}/conf.py" DESTINATION "${projectDir}/${buildDirRelative}/${currentFileNameNoExt}/${sourceDirRelative}")
+    file(COPY "${projectDir}/name-version.txt" DESTINATION "${projectDir}/${buildDirRelative}/${currentFileNameNoExt}/${sourceDirRelative}")
 
-            # build
-            if("${verbose}")
-                message(STATUS "project: '${project}' build ${builder}")
-            endif()
-            if(EXISTS "${sourceDir}/${buildDirRelative}/doc/${project}/${builder}")
-                file(REMOVE_RECURSE "${sourceDir}/${buildDirRelative}/doc/${project}/${builder}")
-            endif()
-            execute_process(
-                COMMAND "${CMAKE_COMMAND}" "-E" "env" "PROJECT=${project}"
-                        "${SPHINX_BUILD_COMMAND}" "-E" "-b" "${builder}" "doc" "${buildDirRelative}/doc/${project}/${builder}"
-                WORKING_DIRECTORY "${sourceDir}"
-                COMMAND_ECHO "STDOUT"
-                COMMAND_ERROR_IS_FATAL "ANY"
-            )
+    foreach(builder IN LISTS "builders")
 
-        endforeach()
+        # build
+        if("${verbose}")
+            message(STATUS "build ${builder}")
+        endif()
+        if(EXISTS "${projectDir}/${buildDirRelative}/doc/${builder}")
+            file(REMOVE_RECURSE "${projectDir}/${buildDirRelative}/doc/${builder}")
+        endif()
+        execute_process(
+            COMMAND "${SPHINX_BUILD_COMMAND}"
+                    "-E"
+                    "-b"
+                    "${builder}"
+                    "${buildDirRelative}/${currentFileNameNoExt}/${sourceDirRelative}"
+                    "${buildDirRelative}/doc/${builder}"
+            WORKING_DIRECTORY "${projectDir}"
+            COMMAND_ECHO "STDOUT"
+            COMMAND_ERROR_IS_FATAL "ANY"
+        )
+
     endforeach()
 
     if("${verbose}")

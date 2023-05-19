@@ -38,7 +38,6 @@ six==1.16.0
 smartypants==2.0.1
 snowballstemmer==2.2.0
 Sphinx==6.2.1
-sphinx-multiproject==1.0.0rc1
 sphinxcontrib-applehelp==1.0.4
 sphinxcontrib-devhelp==1.0.2
 sphinxcontrib-htmlhelp==2.0.1
