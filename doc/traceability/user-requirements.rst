@@ -2,7 +2,6 @@ User Requirements.
 ==================
 
 .. item:: USER_REQUIREMENT_1 User requirement 1
-   :validated_by: SYSTEM_TEST_1
 
    User requirement 1.
 
@@ -24,7 +23,6 @@ User Requirements.
         - NOTIFY, READ, WRITE
 
 .. item:: USER_REQUIREMENT_2 User requirement 2
-   :validated_by: SYSTEM_TEST_1
 
    User requirement 2.
 

@@ -20,6 +20,7 @@ function(execute_script args)
     set(oneValueKeywords
         "VERBOSE"
         "SSL"
+        "UNDEFINED_REFERENCE"
         "SOURCE_DIR"
         "BUILD_DIR"
     )
@@ -53,6 +54,16 @@ function(execute_script args)
             set(ssl "TRUE")
         else()
             set(ssl "FALSE")
+        endif()
+    endif()
+
+    if("${${currentFunctionName}_UNDEFINED_REFERENCE}" STREQUAL "")
+        set(undefinedReference "FALSE")
+    else()
+        if("${${currentFunctionName}_UNDEFINED_REFERENCE}")
+            set(undefinedReference "TRUE")
+        else()
+            set(undefinedReference "FALSE")
         endif()
     endif()
 
@@ -183,15 +194,14 @@ function(execute_script args)
             string(APPEND indexRstContent "   ${fileDir}/${fileNameNoExt}" "\n")
         endif()
     endforeach()
-    string(JOIN "\n" indexRstContent
-        "${indexRstContent}"
-        ""
-        "Undefined references."
-        "====================="
-        ""
-        ".. item:: UNDEFINED_REFERENCE Undefined reference."
-        ""
-    )
+    if("${undefinedReference}")
+        string(JOIN "\n" indexRstContent
+            "${indexRstContent}"
+            ""
+            ".. item:: UNDEFINED_REFERENCE Undefined reference."
+            ""
+        )
+    endif()
     file(MAKE_DIRECTORY "${projectDir}/${buildDirRelative}/${currentFileNameNoExt}/${sourceDirRelative}")
     file(WRITE "${projectDir}/${buildDirRelative}/${currentFileNameNoExt}/${sourceDirRelative}/index.rst" "${indexRstContent}")
     foreach(file IN LISTS "files")

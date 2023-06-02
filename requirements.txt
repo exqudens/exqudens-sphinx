@@ -7,12 +7,14 @@ contourpy==1.0.7
 cycler==0.11.0
 docutils==0.19
 docxbuilder==1.2.0
+exceptiongroup==1.1.1
 fonttools==4.39.4
 freetype-py==2.3.0
 fspath==20230218
 idna==3.4
 imagesize==1.4.1
 importlib-metadata==6.6.0
+iniconfig==2.0.0
 Jinja2==3.1.2
 kiwisolver==1.4.4
 linuxdoc==20230506
@@ -24,9 +26,11 @@ natsort==8.3.1
 numpy==1.24.3
 packaging==23.1
 Pillow==9.5.0
+pluggy==1.0.0
 pycairo==1.23.0
 Pygments==2.15.1
 pyparsing==3.0.9
+pytest==7.3.1
 python-dateutil==2.8.2
 python-decouple==3.8
 PyYAML==6.0
@@ -46,5 +50,6 @@ sphinxcontrib-jsmath==1.0.1
 sphinxcontrib-qthelp==1.0.3
 sphinxcontrib-serializinghtml==1.1.5
 sphinxcontrib-traceability==0.1.4
+tomli==2.0.1
 urllib3==2.0.2
 zipp==3.15.0

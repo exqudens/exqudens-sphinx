@@ -3,9 +3,11 @@
 # For the full list of built-in configuration values, see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
+import sys
+import os
+import mlx.traceability
 from pathlib import Path
 from datetime import datetime
-import mlx.traceability
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
@@ -19,7 +21,10 @@ rst_prolog = '.. |project| replace:: ' + project
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
+sys.path.append(os.path.normpath(Path(__file__).parent.parent.parent.parent.joinpath('src', 'test', 'py')))
+
 extensions = [
+    'sphinx.ext.autodoc',
     'linuxdoc.rstFlatTable',
     'mlx.traceability',
     'docxbuilder',
