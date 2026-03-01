@@ -1,0 +1,111 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "help",
+            "type": "debugpy",
+            "request": "launch",
+            "console": "internalConsole",
+            "cwd": "${workspaceFolder}",
+            "program": "${workspaceFolder}/project.py",
+            "args": [
+                "help"
+            ]
+        },
+        {
+            "name": "clean_env env",
+            "type": "debugpy",
+            "request": "launch",
+            "console": "internalConsole",
+            "cwd": "${workspaceFolder}",
+            "program": "${workspaceFolder}/project.py",
+            "args": [
+                "clean_env",
+                "env"
+            ]
+        },
+        {
+            "name": "clean_doc doc_example_enumerated_list",
+            "type": "debugpy",
+            "request": "launch",
+            "console": "internalConsole",
+            "cwd": "${workspaceFolder}",
+            "program": "${workspaceFolder}/project.py",
+            "args": [
+                "clean_doc",
+                "doc_example_enumerated_list"
+            ]
+        },
+        {
+            "name": "clean_doc doc_example_enumerated_list_hierarchical",
+            "type": "debugpy",
+            "request": "launch",
+            "console": "internalConsole",
+            "cwd": "${workspaceFolder}",
+            "program": "${workspaceFolder}/project.py",
+            "args": [
+                "clean_doc",
+                "doc_example_enumerated_list_hierarchical"
+            ]
+        },
+        {
+            "name": "clean_doc doc",
+            "type": "debugpy",
+            "request": "launch",
+            "console": "internalConsole",
+            "cwd": "${workspaceFolder}",
+            "program": "${workspaceFolder}/project.py",
+            "args": [
+                "clean_doc",
+                "doc"
+            ]
+        },
+        {
+            "name": "clean_package package",
+            "type": "debugpy",
+            "request": "launch",
+            "console": "internalConsole",
+            "cwd": "${workspaceFolder}",
+            "program": "${workspaceFolder}/project.py",
+            "args": [
+                "clean_package",
+                "package"
+            ]
+        },
+        {
+            "name": "clean",
+            "type": "debugpy",
+            "request": "launch",
+            "console": "internalConsole",
+            "cwd": "${workspaceFolder}",
+            "program": "${workspaceFolder}/project.py",
+            "args": [
+                "clean"
+            ]
+        },
+        {
+            "name": "warning_util",
+            "type": "debugpy",
+            "request": "launch",
+            "console": "internalConsole",
+            "cwd": "${workspaceFolder}",
+            "python": "py.exe",
+            "program": "doc/rst/sphinx/warning_util.py",
+            "args": [
+                "${file}"
+            ]
+        },
+        {
+            "name": "debugpy-sphinx",
+            "type": "debugpy",
+            "request": "launch",
+            "console": "internalConsole",
+            "cwd": "${workspaceFolder}",
+            "python": "${workspaceFolder}/build/env/Scripts/python.exe",
+            "module": "sphinx",
+            "args": [
+                "--help"
+            ]
+        }
+    ]
+}

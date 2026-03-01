@@ -1,0 +1,28 @@
+{
+    "subprojects": {
+        "example-enumerated-list": {
+            "include_patterns": [
+                "index.rst",
+                "example-enumerated-list/**"
+            ],
+            "docx": {
+                "startdocname": "example-enumerated-list/toctree",
+                "targetname": "example-enumerated-list.docx",
+                "docproperties": {},
+                "toctree_only": false
+            }
+        },
+        "example-enumerated-list-hierarchical": {
+            "include_patterns": [
+                "index.rst",
+                "example-enumerated-list-hierarchical/**"
+            ],
+            "docx": {
+                "startdocname": "example-enumerated-list-hierarchical/toctree",
+                "targetname": "example-enumerated-list-hierarchical.docx",
+                "docproperties": {},
+                "toctree_only": false
+            }
+        }
+    }
+}
