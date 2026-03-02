@@ -9,6 +9,9 @@ from pathlib import Path
 # docutils
 import docutils.nodes
 from docutils.nodes import Node as DocUtilsNode
+from docutils.nodes import container as DocUtilsContainer
+from docutils.nodes import enumerated_list as DocUtilsEnumeratedList
+from docutils.nodes import list_item as DocUtilsListItem
 from docutils.nodes import Text as DocUtilsText
 from docutils.nodes import NodeVisitor as DocUtilsNodeVisitor
 from docutils.nodes import TreePruningException as DocUtilsTreePruningException
@@ -447,11 +450,72 @@ class ConfUtil:
                         new_node = self.docxbuilder_fix_node(old_node)
                         node_parent[child_index] = new_node
 
+            self.docxbuilder_make_enumerated_lists_hierarchical(node=tree)
+
             if self.__docxbuilder_assemble_doctree_log and self.__docxbuilder_assemble_doctree_log_after:
                 self.__logger.info(f"-- {inspect.currentframe().f_code.co_name} log node after")
                 self.docutils_log_node(tree)
 
             return tree
+        except Exception as e:
+            self.__logger.error(e, exc_info=True)
+            raise e
+
+    def docxbuilder_make_enumerated_lists_hierarchical(
+        self,
+        node: None | DocUtilsNode | object
+    ) -> None:
+        try:
+            containers: list[DocUtilsContainer] = []
+
+            for v in node.traverse(include_self=False):
+                if v.__class__.__name__ == 'container' and 'enumerated-list-hierarchical' in v.get('classes', []):
+                    self.docutils_find_nodes(
+                        v,
+                        class_names=['list_item'],
+                        index_key='list_item_hierarchical'
+                    )
+                    containers.append(v)
+
+            enumerated_lists: list[DocUtilsEnumeratedList] = []
+
+            for v in containers:
+                for v1 in v.traverse(include_self=False):
+                    if v1.__class__.__name__ == 'enumerated_list':
+                        enumerated_lists.append(v1)
+
+            for enumerated_list in enumerated_lists:
+                prefix_indices: list[int] = []
+                parent_list_item: None | DocUtilsListItem = None
+
+                if enumerated_list.parent and enumerated_list.parent.__class__.__name__ == 'list_item':
+                    parent_list_item = enumerated_list.parent
+
+                while parent_list_item is not None:
+
+                    parent_list_item_special_key_value = parent_list_item.get('list_item_hierarchical', None)
+                    if parent_list_item_special_key_value is None:
+                        raise Exception("'parent_list_item_special_key_value' is none")
+                    parent_list_item_index: int = -1
+                    for i, v in enumerate(parent_list_item.parent.children):
+                        v_special_key_value = v.get('list_item_hierarchical', None)
+                        if parent_list_item_special_key_value == v_special_key_value:
+                            parent_list_item_index = i + 1
+                            break
+                    if parent_list_item_index < 0:
+                        raise Exception("'parent_list_item_index' less 0")
+                    prefix_indices.append(parent_list_item_index)
+
+                    if parent_list_item.parent and parent_list_item.parent.parent and parent_list_item.parent.parent.__class__.__name__ == 'list_item':
+                        parent_list_item = parent_list_item.parent.parent
+                    else:
+                        parent_list_item = None
+
+                prefix_indices.reverse()
+                prefix: str = ''
+                if prefix_indices:
+                    prefix = '.'.join([str(v) for v in prefix_indices]) + '.'
+                enumerated_list['prefix'] = prefix
         except Exception as e:
             self.__logger.error(e, exc_info=True)
             raise e
