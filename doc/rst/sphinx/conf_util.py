@@ -3,8 +3,7 @@ import inspect
 from logging import LoggerAdapter
 from logging import LogRecord
 from logging import getLogger as logging_get_logger
-from typing import Deque
-from pathlib import Path
+from collections import deque
 
 # docutils
 import docutils.nodes
@@ -28,7 +27,6 @@ from mlx.traceability_exception import TraceabilityException as MlxTraceabilityE
 
 # docxbuilder
 from docxbuilder import DocxBuilder
-from docxbuilder.writer import DocxTranslator
 
 class ConfUtil:
     """
@@ -37,11 +35,11 @@ class ConfUtil:
     __logger: None | LoggerAdapter = None
 
     __sphinx_warnings_file: None | str = None
-    __sphinx_warnings: None | Deque[LogRecord] = None
+    __sphinx_warnings: None | deque[LogRecord] = None
     __sphinx_old_util_logging_warning_suppressor_filter = None
     __sphinx_new_util_logging_warning_suppressor_filter = None
 
-    __docutils_text_visited_nodes: None | Deque[DocUtilsNode] = None
+    __docutils_text_visited_nodes: None | deque[DocUtilsNode] = None
     __docutils_old_dispatch_visit = None
     __docutils_new_dispatch_visit = None
     __docutils_old_dispatch_departure = None
@@ -92,13 +90,13 @@ class ConfUtil:
                 self.__sphinx_warnings_file = sphinx_application._warning.stream2.name
 
             if sphinx_util_logging_warning_suppressor_filter_override:
-                self.__sphinx_warnings = Deque([], sphinx_warnings_size) if sphinx_warnings_size > 0 else Deque([])
+                self.__sphinx_warnings = deque([], sphinx_warnings_size) if sphinx_warnings_size > 0 else deque([])
                 self.__sphinx_old_util_logging_warning_suppressor_filter = getattr(WarningSuppressor, 'filter')
                 self.__sphinx_new_util_logging_warning_suppressor_filter = lambda sphinx_self, record: self.sphinx_util_logging_warning_suppressor_filter(sphinx_self, record)
                 setattr(WarningSuppressor, 'filter', self.__sphinx_new_util_logging_warning_suppressor_filter)
 
             if docutils_dispatch_visit_override or docutils_dispatch_departure_override:
-                self.__docutils_text_visited_nodes = Deque([], docutils_text_visited_nodes_size) if docutils_text_visited_nodes_size > 0 else Deque([])
+                self.__docutils_text_visited_nodes = deque([], docutils_text_visited_nodes_size) if docutils_text_visited_nodes_size > 0 else deque([])
             if docutils_dispatch_visit_override:
                 self.__docutils_old_dispatch_visit = getattr(DocUtilsNodeVisitor, 'dispatch_visit')
                 self.__docutils_new_dispatch_visit = lambda docutils_self, node: self.docutils_dispatch_visit(docutils_self, node)
@@ -135,16 +133,14 @@ class ConfUtil:
                 record_location: str = getattr(record, 'location', '')
                 record_levelname: str = record.levelname
                 record_message: str = ''
-                if record_location:
-                    record_location = Path(record_location).as_posix()
                 try:
                     record_message = record.msg % record.args
                 except (TypeError, ValueError):
                     record_message = record.msg  # use record.msg itself
                 entry: dict[str, str] = {
-                    'location': record_location,
-                    'levelname': record_levelname,
-                    'message': record_message
+                    'location': str(record_location),
+                    'levelname': str(record_levelname),
+                    'message': str(record_message)
                 }
                 result.append(entry)
             return result
