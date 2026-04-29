@@ -15,9 +15,6 @@ from sphinx.application import Sphinx
 from sphinx.config import Config
 from sphinx.util.logging import getLogger as sphinx_util_logging_get_logger
 
-# mlx.traceability
-import mlx.traceability
-
 # local
 sys.path.append(Path(__file__).parent.as_posix())
 from conf_util import ConfUtil
@@ -30,19 +27,17 @@ conf_util_obj: ConfUtil = ConfUtil(logger=logger)
 warning_util_obj: WarningUtil = WarningUtil(logger=logger)
 
 # -- Project information -----------------------------------------------------
-# https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
+# https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions: list[str] = [
     #'sphinx.ext.autodoc',
     #'sphinx.ext.autosectionlabel',
     'linuxdoc.rstFlatTable',
-    'mlx.traceability',
+    #'mlx.traceability',
     #'breathe',
     #'rst2pdf.pdfbuilder',
-    'docxbuilder'
+    #'docxbuilder'
 ]
-templates_path: list[str] = []
-exclude_patterns: list[str] = []
 
 # -- Options for AUTO_SECTION_LABEL output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/extensions/autosectionlabel.html#configuration
@@ -53,19 +48,19 @@ exclude_patterns: list[str] = []
 # -- Options for TRACEABILITY output -------------------------------------------------
 # https://melexis.github.io/sphinx-traceability-extension/configuration.html#configuration
 
-traceability_render_relationship_per_item: bool = False
-traceability_render_attributes_per_item = False
-traceability_attributes: dict[str, str] = {}
-traceability_attribute_to_string: dict[str, str] = {}
-traceability_relationships: dict[str, str] = {
-    'linked_from': 'linked_to'
-}
-traceability_relationship_to_string: dict[str, str] = {
-    'linked_from': 'Linked from',
-    'linked_to': 'Linked to'
-}
-traceability_notifications: dict[str, str] = {}
-traceability_json_export_path: None | str = None
+#traceability_render_relationship_per_item: bool = False
+#traceability_render_attributes_per_item = False
+#traceability_attributes: dict[str, str] = {}
+#traceability_attribute_to_string: dict[str, str] = {}
+#traceability_relationships: dict[str, str] = {
+#    'linked_from': 'linked_to'
+#}
+#traceability_relationship_to_string: dict[str, str] = {
+#    'linked_from': 'Linked from',
+#    'linked_to': 'Linked to'
+#}
+#traceability_notifications: dict[str, str] = {}
+#traceability_json_export_path: None | str = None
 
 # def traceability_inspect_item(name, collection):
 #     conf_util_obj.mlx_traceability_inspect_item(
@@ -86,18 +81,16 @@ traceability_json_export_path: None | str = None
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme: str = 'alabaster'
-html_static_path: list[str] = [
-    Path(mlx.traceability.__file__).parent.joinpath('assets').as_posix()
-]
+#html_theme: str = 'alabaster'
+#html_static_path: list[str] = []
 
 # -- Options for DOCX output -------------------------------------------------
 # https://docxbuilder.readthedocs.io/en/latest/docxbuilder.html#usage
 
-docx_documents: list[tuple[str, str, dict[str, str], bool]] = []
-docx_coverpage: bool = False
-docx_pagebreak_before_section: int = 0
-docx_style: str = Path(__file__).parent.joinpath('style.docx').as_posix()
+#docx_documents: list[tuple[str, str, dict[str, str], bool]] = []
+#docx_coverpage: bool = False
+#docx_pagebreak_before_section: int = 0
+#docx_style: str = Path(__file__).parent.joinpath('style.docx').as_posix()
 #docx_style_names: dict[str, str] = {}
 
 # -- Options for PDF output -------------------------------------------------
@@ -123,6 +116,10 @@ def project_config_inited(app: Sphinx, config: Config) -> None:
 
         conf: dict[str, object] = json.loads(Path(__file__).parent.joinpath('conf.json').read_bytes().decode())
         logger.info(f"-- [{inspect.currentframe().f_code.co_name}] conf: '{json.dumps(conf, indent=4)}'")
+
+        config.project = conf.get('project', 'project-name')
+        config.version = conf.get('version', '0.0.0')
+        config.html_theme = conf.get('html_theme', 'alabaster')
 
         if 'substitutions' in conf:
             conf_substitutions: None | dict[str, str] | object = conf.get('substitutions', None)
@@ -161,7 +158,7 @@ def project_config_inited(app: Sphinx, config: Config) -> None:
         config_project_builder: str = str(config.project_builder) if config.project_builder else ''
         config_project_subprojects: list[str] = list(config.project_subprojects) if config.project_subprojects else []
         supported_subprojects: set[str] = set(subprojects.keys())
-        supported_builders: set[str] = {'xml', 'html', 'docx'}
+        supported_builders: set[str] = {'xml', 'html'}
         include_patterns: list[str] = []
         exclude_patterns: list[str] = []
 
@@ -208,6 +205,8 @@ def project_build_finished(app: Sphinx, exception: None | Exception) -> None:
 
         if exception:
             raise exception
+
+        logger.info(f"-- [{inspect.currentframe().f_code.co_name}] conf_util_obj.get_sphinx_warnings_file(): '{conf_util_obj.get_sphinx_warnings_file()}'")
 
         warning_util_obj.check_warnings(
             input=conf_util_obj.get_sphinx_warnings(),

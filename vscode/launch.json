@@ -1,0 +1,103 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "help",
+            "type": "node",
+            "request": "launch",
+            "console": "internalConsole",
+            "outputCapture": "std",
+            "cwd": "${workspaceFolder}",
+            "runtimeExecutable": "python",
+            "runtimeArgs": [
+                "project.py",
+                "help"
+            ],
+            "windows": {
+                "runtimeExecutable": "py"
+            }
+        },
+        {
+            "name": "clean_env env",
+            "type": "node",
+            "request": "launch",
+            "console": "internalConsole",
+            "outputCapture": "std",
+            "cwd": "${workspaceFolder}",
+            "runtimeExecutable": "python",
+            "runtimeArgs": [
+                "project.py",
+                "clean_env",
+                "env"
+            ],
+            "windows": {
+                "runtimeExecutable": "py"
+            }
+        },
+        {"name": "@LAUNCH_DOC_CONFIGURATIONS@"},
+        {
+            "name": "clean_package package",
+            "type": "node",
+            "request": "launch",
+            "console": "internalConsole",
+            "outputCapture": "std",
+            "cwd": "${workspaceFolder}",
+            "runtimeExecutable": "python",
+            "runtimeArgs": [
+                "project.py",
+                "clean_package",
+                "package"
+            ],
+            "windows": {
+                "runtimeExecutable": "py"
+            }
+        },
+        {
+            "name": "clean",
+            "type": "node",
+            "request": "launch",
+            "console": "internalConsole",
+            "outputCapture": "std",
+            "cwd": "${workspaceFolder}",
+            "runtimeExecutable": "python",
+            "runtimeArgs": [
+                "project.py",
+                "clean"
+            ],
+            "windows": {
+                "runtimeExecutable": "py"
+            }
+        },
+        {
+            "name": "warning_util",
+            "type": "node",
+            "request": "launch",
+            "console": "internalConsole",
+            "outputCapture": "std",
+            "cwd": "${workspaceFolder}",
+            "runtimeExecutable": "python",
+            "runtimeArgs": [
+                "doc/rst/sphinx/warning_util.py",
+                "${file}"
+            ],
+            "windows": {
+                "runtimeExecutable": "py"
+            }
+        },
+        {
+            "name": "debugpy-sphinx",
+            "type": "debugpy",
+            "request": "launch",
+            "console": "internalConsole",
+            "cwd": "${workspaceFolder}",
+            "python": "${workspaceFolder}/build/env/bin/python",
+            "module": "sphinx",
+            "args": [
+                "--help"
+            ],
+            "windows": {
+                "python": "${workspaceFolder}/build/env/Scripts/python.exe"
+            }
+        }
+    ]
+}

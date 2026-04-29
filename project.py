@@ -58,6 +58,11 @@ class Project:
 
             self.__logger.info(f"-- [{inspect.currentframe().f_code.co_name}]: bgn")
 
+            if Path(env_dir).exists():
+                self.__logger.info(f"-- [{inspect.currentframe().f_code.co_name}]: exists")
+                self.__logger.info(f"-- [{inspect.currentframe().f_code.co_name}]: end")
+                return
+
             # create env
             cmd: list[str] = [
                 sys.executable,
@@ -122,13 +127,19 @@ class Project:
 
     def doc_example_enumerated_list(self) -> None:
         try:
+            self.env()
+
             project_dir: str = Path(self.__project_dir).as_posix()
             build_dir: str = Path(project_dir).joinpath('build').as_posix()
             env_dir: str = Path(build_dir).joinpath('env').as_posix()
             subproject: str = 'example-enumerated-list'
-            builder: str = 'docx'
+            builder: str = 'html'
+            doc_dir: str = Path(build_dir).joinpath('doc', subproject, builder).as_posix()
 
             self.__logger.info(f"-- [{inspect.currentframe().f_code.co_name}]: bgn")
+
+            if Path(doc_dir).exists():
+                shutil.rmtree(doc_dir)
 
             python_file: str = self._find_python(dir=env_dir)
             subprocess.run(
@@ -154,15 +165,21 @@ class Project:
             self.__logger.error(e, exc_info=True)
             raise e
 
-    def doc_example_enumerated_list_hierarchical(self) -> None:
+    def doc_example_task_list(self) -> None:
         try:
+            self.env()
+
             project_dir: str = Path(self.__project_dir).as_posix()
             build_dir: str = Path(project_dir).joinpath('build').as_posix()
             env_dir: str = Path(build_dir).joinpath('env').as_posix()
-            subproject: str = 'example-enumerated-list-hierarchical'
-            builder: str = 'docx'
+            subproject: str = 'example-task-list'
+            builder: str = 'html'
+            doc_dir: str = Path(build_dir).joinpath('doc', subproject, builder).as_posix()
 
             self.__logger.info(f"-- [{inspect.currentframe().f_code.co_name}]: bgn")
+
+            if Path(doc_dir).exists():
+                shutil.rmtree(doc_dir)
 
             python_file: str = self._find_python(dir=env_dir)
             subprocess.run(
@@ -193,7 +210,7 @@ class Project:
             self.__logger.info(f"-- [{inspect.currentframe().f_code.co_name}]: bgn")
 
             self.doc_example_enumerated_list()
-            self.doc_example_enumerated_list_hierarchical()
+            self.doc_example_task_list()
 
             self.__logger.info(f"-- [{inspect.currentframe().f_code.co_name}]: end")
         except Exception as e:
@@ -221,7 +238,7 @@ class Project:
     def package(self) -> None:
         try:
             project_dir: str = Path(self.__project_dir).as_posix()
-            project_json_file: str = Path(project_dir).joinpath('project.json').as_posix()
+            conf_json_file: str = Path(project_dir).joinpath('doc', 'rst', 'sphinx', 'conf.json').as_posix()
             build_dir: str = Path(project_dir).joinpath('build').as_posix()
             env_dir: str = Path(build_dir).joinpath('env').as_posix()
             package_dir: str = Path(build_dir).joinpath('package').as_posix()
@@ -238,16 +255,16 @@ class Project:
             self.__logger.info(f"-- [{inspect.currentframe().f_code.co_name}]: bgn")
 
             # create package
-            if not Path(project_json_file).exists():
-                raise Exception(f"not exists: '{project_json_file}'")
+            if not Path(conf_json_file).exists():
+                raise Exception(f"not exists: '{conf_json_file}'")
 
-            project_json: dict[str, object] = json.loads(Path(project_json_file).read_bytes().decode())
-            package_name: None | str = project_json.get('name', None)
+            conf_json: dict[str, object] = json.loads(Path(conf_json_file).read_bytes().decode())
+            package_name: None | str = conf_json.get('name', None)
 
             if package_name is None:
                 raise Exception(f"'package_name' is None")
 
-            package_version: None | str = project_json.get('version', None)
+            package_version: None | str = conf_json.get('version', None)
 
             if package_version is None:
                 raise Exception(f"'package_version' is None")
@@ -365,6 +382,77 @@ class Project:
             self.clean_package()
             self.clean_doc()
             self.clean_env()
+
+            self.__logger.info(f"-- [{inspect.currentframe().f_code.co_name}]: end")
+        except Exception as e:
+            self.__logger.error(e, exc_info=True)
+            raise e
+
+    def vscode(self) -> None:
+        try:
+            self.__logger.info(f"-- [{inspect.currentframe().f_code.co_name}]: bgn")
+
+            self.env()
+
+            project_dir: str = Path(self.__project_dir).as_posix()
+            template_launch_json_file: str = Path(project_dir).joinpath('vscode', 'launch.json').as_posix()
+            launch_json_file: str = Path(project_dir).joinpath('.vscode', 'launch.json').as_posix()
+            template_launch_json: str = Path(template_launch_json_file).read_bytes().decode()
+            env_file: str = Path(project_dir).joinpath('.env').as_posix()
+            env_file_content: str = 'PYTHONPATH=build/env/lib/site-packages\n'
+
+            method_names: list[str] = [name for name, _ in inspect.getmembers(self, predicate=inspect.ismethod) if not name.startswith('_')]
+            doc_method_names: dict[str, None | str] = {}
+            for v in method_names:
+                method_name: str = str(v)
+                if method_name == 'doc' or method_name.startswith('doc_'):
+                    doc_method_names[method_name] = None
+            for v in method_names:
+                method_name: str = str(v)
+                if method_name == 'clean_doc' or method_name.startswith('clean_doc_'):
+                    method_name_suffix: str = method_name.replace('clean_', '')
+                    if method_name_suffix and method_name_suffix in doc_method_names:
+                        doc_method_names[method_name_suffix] = method_name
+
+            launch_doc_configurations_ph: str = '{"name": "@LAUNCH_DOC_CONFIGURATIONS@"},'
+            launch_doc_configurations_lines: list[str] = [v for v in template_launch_json.splitlines() if v.endswith(launch_doc_configurations_ph)]
+            launch_doc_configurations_indent: str = launch_doc_configurations_lines[0].replace(launch_doc_configurations_ph, '')
+            launch_doc_configurations: list[str] = []
+            for v in doc_method_names:
+                method_name: str = str(v)
+                clean_method_name: None | str = doc_method_names.get(method_name, None)
+                if clean_method_name is None:
+                    clean_method_name = 'clean_doc'
+                configuration_lines: list[str] = [
+                    '{',
+                    f'    "name": "{clean_method_name} {method_name}",',
+                    '    "type": "node",',
+                    '    "request": "launch",',
+                    '    "console": "internalConsole",',
+                    '    "outputCapture": "std",',
+                    '    "cwd": "${workspaceFolder}",',
+                    '    "runtimeExecutable": "python",',
+                    '    "runtimeArgs": [',
+                    '        "project.py",',
+                    f'        "{clean_method_name}",',
+                    f'        "{method_name}",',
+                    '    ],',
+                    '    "windows": {',
+                    '        "runtimeExecutable": "py",',
+                    '    }',
+                    '}'
+                ]
+                configuration = f'\n{launch_doc_configurations_indent}'.join(configuration_lines)
+                launch_doc_configurations.append(configuration)
+            launch_doc_configurations_replacement: str = f',\n{launch_doc_configurations_indent}'.join(launch_doc_configurations)
+            template_launch_json = template_launch_json.replace(launch_doc_configurations_ph, launch_doc_configurations_replacement + ',')
+
+            Path(launch_json_file).parent.mkdir(parents=True, exist_ok=True)
+            Path(launch_json_file).write_bytes(template_launch_json.encode())
+            self.__logger.info(f"-- [{inspect.currentframe().f_code.co_name}]: generated: '{launch_json_file}'")
+
+            if not Path(env_file).exists():
+                Path(env_file).write_bytes(env_file_content.encode())
 
             self.__logger.info(f"-- [{inspect.currentframe().f_code.co_name}]: end")
         except Exception as e:
